@@ -38,7 +38,7 @@ app.get('/api/health', (req, res) => {
 async function start() {
   const uri = process.env.MONGODB_URI;
   if (!uri) {
-    console.warn('No MONGODB_URI in .env – using in-memory data. Add MONGODB_URI to connect to MongoDB.');
+    console.warn('No MONGODB_URI set. Add MONGODB_URI in Render Environment (or in .env locally).');
   } else {
     try {
       await mongoose.connect(uri);
@@ -49,8 +49,9 @@ async function start() {
     }
   }
 
-  app.listen(PORT, '127.0.0.1', () => {
-    console.log(`Backend running at http://127.0.0.1:${PORT}`);
+  // Bind to 0.0.0.0 so Render (and other hosts) can detect the open port
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Backend running on port ${PORT}`);
   });
 }
 
