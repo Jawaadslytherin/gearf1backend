@@ -1,5 +1,6 @@
 import express from 'express';
 import Article from '../models/Article.js';
+import { requireAuth } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -45,7 +46,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', requireAuth, async (req, res) => {
   try {
     const { title, excerpt, body, category, imageUrl, featured } = req.body;
     if (!title || !category) {
@@ -69,7 +70,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', requireAuth, async (req, res) => {
   try {
     const { title, excerpt, body, category, imageUrl, featured } = req.body;
     const article = await Article.findById(req.params.id);
@@ -88,7 +89,7 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requireAuth, async (req, res) => {
   try {
     const article = await Article.findByIdAndDelete(req.params.id);
     if (!article) return res.status(404).json({ error: 'Article not found.' });
