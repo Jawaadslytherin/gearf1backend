@@ -8,6 +8,7 @@ import articlesRouter from './routes/articles.js';
 import uploadRouter from './routes/upload.js';
 import imagesRouter from './routes/images.js';
 import footballRouter from './routes/football.js';
+import f1Router from './routes/f1.js';
 import authRouter from './routes/auth.js';
 
 const app = express();
@@ -28,6 +29,7 @@ app.use('/api/articles', articlesRouter);
 app.use('/api/upload', uploadRouter);
 app.use('/api/images', imagesRouter);
 app.use('/api/football', footballRouter);
+app.use('/api/f1', f1Router);
 
 app.get('/api/health', (req, res) => {
   res.json({ ok: true, message: 'Backend is running' });

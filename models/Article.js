@@ -6,7 +6,11 @@ const articleSchema = new mongoose.Schema(
     slug: { type: String, required: true, unique: true },
     excerpt: { type: String, default: '' },
     body: { type: String, default: '' },
-    category: { type: String, required: true, enum: ['Football', 'Cricket', 'Rugby', 'Tennis', 'Golf', 'Cycling', 'Others'] },
+    category: {
+      type: String,
+      required: true,
+      enum: ['Race Report', 'Qualifying', 'Practice', 'Analysis', 'Tech', 'Drivers', 'Teams', 'News'],
+    },
     imageUrl: { type: String, default: '' },
     featured: { type: Boolean, default: false },
   },
