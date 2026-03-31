@@ -12,6 +12,8 @@ const articleSchema = new mongoose.Schema(
       enum: ['Race Report', 'Qualifying', 'Practice', 'Analysis', 'Tech', 'Drivers', 'Teams', 'News'],
     },
     imageUrl: { type: String, default: '' },
+    photoCredit: { type: String, default: '' },
+    articleCredit: { type: String, default: '' },
     featured: { type: Boolean, default: false },
   },
   { timestamps: true }

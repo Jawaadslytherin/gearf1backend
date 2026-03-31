@@ -48,7 +48,7 @@ router.get('/:id', async (req, res) => {
 
 router.post('/', requireAuth, async (req, res) => {
   try {
-    const { title, excerpt, body, category, imageUrl, featured } = req.body;
+    const { title, excerpt, body, category, imageUrl, photoCredit, articleCredit, featured } = req.body;
     if (!title || !category) {
       return res.status(400).json({ error: 'Title and category are required.' });
     }
@@ -62,6 +62,8 @@ router.post('/', requireAuth, async (req, res) => {
       body: body || '',
       category,
       imageUrl: imageUrl || '',
+      photoCredit: photoCredit || '',
+      articleCredit: articleCredit || '',
       featured: !!featured,
     });
     res.status(201).json(article);
@@ -72,7 +74,7 @@ router.post('/', requireAuth, async (req, res) => {
 
 router.put('/:id', requireAuth, async (req, res) => {
   try {
-    const { title, excerpt, body, category, imageUrl, featured } = req.body;
+    const { title, excerpt, body, category, imageUrl, photoCredit, articleCredit, featured } = req.body;
     const article = await Article.findById(req.params.id);
     if (!article) return res.status(404).json({ error: 'Article not found.' });
     if (title !== undefined) article.title = title;
@@ -80,6 +82,8 @@ router.put('/:id', requireAuth, async (req, res) => {
     if (body !== undefined) article.body = body;
     if (category !== undefined) article.category = category;
     if (imageUrl !== undefined) article.imageUrl = imageUrl;
+    if (photoCredit !== undefined) article.photoCredit = photoCredit;
+    if (articleCredit !== undefined) article.articleCredit = articleCredit;
     if (featured !== undefined) article.featured = !!featured;
     if (title) article.slug = slugify(article.title);
     await article.save();
