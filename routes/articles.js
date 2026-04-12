@@ -48,7 +48,7 @@ router.get('/:id', async (req, res) => {
 
 router.post('/', requireAuth, async (req, res) => {
   try {
-    const { title, excerpt, body, category, imageUrl, photoCredit, articleCredit, featured } = req.body;
+    const { title, excerpt, body, content, category, imageUrl, photoCredit, articleCredit, featured } = req.body;
     if (!title || !category) {
       return res.status(400).json({ error: 'Title and category are required.' });
     }
@@ -60,6 +60,7 @@ router.post('/', requireAuth, async (req, res) => {
       slug,
       excerpt: excerpt || '',
       body: body || '',
+      content: Array.isArray(content) ? content : [],
       category,
       imageUrl: imageUrl || '',
       photoCredit: photoCredit || '',
@@ -74,12 +75,13 @@ router.post('/', requireAuth, async (req, res) => {
 
 router.put('/:id', requireAuth, async (req, res) => {
   try {
-    const { title, excerpt, body, category, imageUrl, photoCredit, articleCredit, featured } = req.body;
+    const { title, excerpt, body, content, category, imageUrl, photoCredit, articleCredit, featured } = req.body;
     const article = await Article.findById(req.params.id);
     if (!article) return res.status(404).json({ error: 'Article not found.' });
     if (title !== undefined) article.title = title;
     if (excerpt !== undefined) article.excerpt = excerpt;
     if (body !== undefined) article.body = body;
+    if (content !== undefined) article.content = Array.isArray(content) ? content : [];
     if (category !== undefined) article.category = category;
     if (imageUrl !== undefined) article.imageUrl = imageUrl;
     if (photoCredit !== undefined) article.photoCredit = photoCredit;

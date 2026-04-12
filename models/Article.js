@@ -1,11 +1,21 @@
 import mongoose from 'mongoose';
 
+const contentBlockSchema = new mongoose.Schema(
+  {
+    type: { type: String, enum: ['paragraph', 'embed', 'divider'], required: true },
+    text: { type: String, default: '' },
+    url: { type: String, default: '' },
+  },
+  { _id: false }
+);
+
 const articleSchema = new mongoose.Schema(
   {
     title: { type: String, required: true },
     slug: { type: String, required: true, unique: true },
     excerpt: { type: String, default: '' },
     body: { type: String, default: '' },
+    content: { type: [contentBlockSchema], default: [] },
     category: {
       type: String,
       required: true,
