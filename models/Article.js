@@ -12,6 +12,7 @@ const contentBlockSchema = new mongoose.Schema(
 const articleSchema = new mongoose.Schema(
   {
     title: { type: String, required: true },
+    subheading: { type: String, default: '' },
     slug: { type: String, required: true, unique: true },
     excerpt: { type: String, default: '' },
     body: { type: String, default: '' },
