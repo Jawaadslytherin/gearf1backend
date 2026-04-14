@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const contentBlockSchema = new mongoose.Schema(
   {
-    type: { type: String, enum: ['paragraph', 'embed', 'divider'], required: true },
+    type: { type: String, enum: ['paragraph', 'embed', 'divider', 'subheading'], required: true },
     text: { type: String, default: '' },
     url: { type: String, default: '' },
   },
