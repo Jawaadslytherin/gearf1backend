@@ -35,6 +35,50 @@ app.get('/api/health', (req, res) => {
   res.json({ ok: true, message: 'Backend is running' });
 });
 
+app.get('/api/sitemap', async (req, res) => {
+  try {
+    const SITE_URL = (process.env.VITE_SITE_URL || 'https://gearupf1.com').replace(/\/$/, '');
+    const Article = (await import('./models/Article.js')).default;
+    const articles = await Article.find({}, 'slug updatedAt').sort({ createdAt: -1 }).lean();
+
+    const staticPages = [
+      { path: '/', priority: '1.0', changefreq: 'daily' },
+      { path: '/blog', priority: '0.9', changefreq: 'daily' },
+      { path: '/drivers', priority: '0.7', changefreq: 'weekly' },
+      { path: '/calendar', priority: '0.7', changefreq: 'weekly' },
+      { path: '/about', priority: '0.5', changefreq: 'monthly' },
+      { path: '/contact', priority: '0.5', changefreq: 'monthly' },
+    ];
+
+    const staticEntries = staticPages.map(({ path, priority, changefreq }) => `
+  <url>
+    <loc>${SITE_URL}${path}</loc>
+    <changefreq>${changefreq}</changefreq>
+    <priority>${priority}</priority>
+  </url>`).join('');
+
+    const articleEntries = articles.map((a) => `
+  <url>
+    <loc>${SITE_URL}/article/${a.slug}</loc>
+    <lastmod>${new Date(a.updatedAt || a.createdAt).toISOString().split('T')[0]}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>`).join('');
+
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${staticEntries}
+${articleEntries}
+</urlset>`;
+
+    res.setHeader('Content-Type', 'application/xml');
+    res.setHeader('Cache-Control', 'public, max-age=3600');
+    res.send(xml);
+  } catch (err) {
+    res.status(500).send('Could not generate sitemap.');
+  }
+});
+
 async function start() {
   const uri = process.env.MONGODB_URI;
   if (!uri) {
