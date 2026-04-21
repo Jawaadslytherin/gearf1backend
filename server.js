@@ -35,6 +35,57 @@ app.get('/api/health', (req, res) => {
   res.json({ ok: true, message: 'Backend is running' });
 });
 
+app.get('/api/og/:slug', async (req, res) => {
+  try {
+    const SITE_URL = (process.env.VITE_SITE_URL || 'https://gearupf1.com').replace(/\/$/, '');
+    const Article = (await import('./models/Article.js')).default;
+    const article = await Article.findOne({ slug: req.params.slug }, 'title excerpt imageUrl category articleCredit createdAt').lean();
+
+    if (!article) {
+      return res.redirect(302, `${SITE_URL}/article/${req.params.slug}`);
+    }
+
+    const slug = req.params.slug;
+    const pageUrl = `${SITE_URL}/article/${slug}`;
+    const title = `${article.title} | GearUp F1`;
+    const description = article.excerpt || 'Get latest Formula 1 news, race analysis, and driver insights on GearUp F1.';
+    const image = article.imageUrl && article.imageUrl.startsWith('http') ? article.imageUrl : `${SITE_URL}/logo.svg`;
+
+    function esc(s) {
+      return String(s || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    const html = `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>${esc(title)}</title>
+  <meta name="description" content="${esc(description)}" />
+  <link rel="canonical" href="${esc(pageUrl)}" />
+  <meta property="og:title" content="${esc(title)}" />
+  <meta property="og:description" content="${esc(description)}" />
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="${esc(pageUrl)}" />
+  <meta property="og:image" content="${esc(image)}" />
+  <meta property="og:site_name" content="GearUp F1" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="${esc(title)}" />
+  <meta name="twitter:description" content="${esc(description)}" />
+  <meta name="twitter:image" content="${esc(image)}" />
+  <meta http-equiv="refresh" content="0;url=${esc(pageUrl)}" />
+  <script>window.location.replace("${esc(pageUrl)}")</script>
+</head>
+<body></body>
+</html>`;
+
+    res.setHeader('Content-Type', 'text/html');
+    res.setHeader('Cache-Control', 'public, max-age=3600');
+    res.send(html);
+  } catch (err) {
+    res.redirect(302, `https://gearupf1.com/article/${req.params.slug}`);
+  }
+});
+
 app.get('/api/sitemap', async (req, res) => {
   try {
     const SITE_URL = (process.env.VITE_SITE_URL || 'https://gearupf1.com').replace(/\/$/, '');
