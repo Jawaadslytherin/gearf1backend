@@ -38,15 +38,23 @@ app.get('/api/health', (req, res) => {
 app.get('/api/og/:slug', async (req, res) => {
   try {
     const SITE_URL = (process.env.VITE_SITE_URL || 'https://gearupf1.com').replace(/\/$/, '');
-    const Article = (await import('./models/Article.js')).default;
-    const article = await Article.findOne({ slug: req.params.slug }, 'title excerpt imageUrl category articleCredit createdAt').lean();
-
-    if (!article) {
-      return res.redirect(302, `${SITE_URL}/article/${req.params.slug}`);
-    }
-
     const slug = req.params.slug;
     const pageUrl = `${SITE_URL}/article/${slug}`;
+
+    const ua = (req.headers['user-agent'] || '').toLowerCase();
+    const isSocialBot = /linkedinbot|facebookexternalhit|twitterbot|slackbot|whatsapp|telegram|discordbot|pinterest|tumblr|vkshare|w3c_validator|applebot|google-structured-data/.test(ua);
+
+    if (!isSocialBot) {
+      return res.redirect(302, pageUrl);
+    }
+
+    const Article = (await import('./models/Article.js')).default;
+    const article = await Article.findOne({ slug }, 'title excerpt imageUrl category articleCredit createdAt').lean();
+
+    if (!article) {
+      return res.redirect(302, pageUrl);
+    }
+
     const title = `${article.title} | GearUp F1`;
     const description = article.excerpt || 'Get latest Formula 1 news, race analysis, and driver insights on GearUp F1.';
     const image = article.imageUrl && article.imageUrl.startsWith('http') ? article.imageUrl : `${SITE_URL}/logo.svg`;
@@ -72,8 +80,6 @@ app.get('/api/og/:slug', async (req, res) => {
   <meta name="twitter:title" content="${esc(title)}" />
   <meta name="twitter:description" content="${esc(description)}" />
   <meta name="twitter:image" content="${esc(image)}" />
-  <meta http-equiv="refresh" content="0;url=${esc(pageUrl)}" />
-  <script>window.location.replace("${esc(pageUrl)}")</script>
 </head>
 <body></body>
 </html>`;
@@ -82,7 +88,8 @@ app.get('/api/og/:slug', async (req, res) => {
     res.setHeader('Cache-Control', 'public, max-age=3600');
     res.send(html);
   } catch (err) {
-    res.redirect(302, `https://gearupf1.com/article/${req.params.slug}`);
+    const SITE_URL = (process.env.VITE_SITE_URL || 'https://gearupf1.com').replace(/\/$/, '');
+    res.redirect(302, `${SITE_URL}/article/${req.params.slug}`);
   }
 });
 
