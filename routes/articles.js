@@ -13,6 +13,19 @@ function slugify(text) {
     .trim();
 }
 
+function cleanContent(content) {
+  if (!Array.isArray(content)) return content;
+  return content.map(block => {
+    if (block.type === 'paragraph' && block.text) {
+      block.text = block.text
+        .replace(/&nbsp;/gi, ' ')
+        .replace(/\u00a0/g, ' ')
+        .trim();
+    }
+    return block;
+  });
+}
+
 router.get('/', async (req, res) => {
   try {
     const { category, featured, limit = 50 } = req.query;
@@ -61,7 +74,7 @@ router.post('/', requireAuth, async (req, res) => {
       subheading: subheading || '',
       excerpt: excerpt || '',
       body: body || '',
-      content: Array.isArray(content) ? content : [],
+      content: cleanContent(Array.isArray(content) ? content : []),
       category,
       imageUrl: imageUrl || '',
       photoCredit: photoCredit || '',
@@ -83,7 +96,7 @@ router.put('/:id', requireAuth, async (req, res) => {
     if (subheading !== undefined) article.subheading = subheading;
     if (excerpt !== undefined) article.excerpt = excerpt;
     if (body !== undefined) article.body = body;
-    if (content !== undefined) article.content = Array.isArray(content) ? content : [];
+    if (content !== undefined) article.content = cleanContent(Array.isArray(content) ? content : []);
     if (category !== undefined) article.category = category;
     if (imageUrl !== undefined) article.imageUrl = imageUrl;
     if (photoCredit !== undefined) article.photoCredit = photoCredit;
